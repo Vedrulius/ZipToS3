@@ -1,6 +1,7 @@
 package com.mihey.ziptos3.service.impl;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,14 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 @Service
 public class S3ServiceImpl {
 
-    public void upload(File file) throws IOException {
+    public void upload(MultipartFile file) throws IOException {
         File destDir = new File("/home/mihey/Documents/Temp/testUnZip/unzip");
         byte[] buffer = new byte[1024];
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(convertMultiPartToFile(file)));
         ZipEntry zipEntry = zis.getNextEntry();
         while (zipEntry != null) {
             File newFile = newFile(destDir, zipEntry);
@@ -50,4 +50,13 @@ public class S3ServiceImpl {
         }
         return destFile;
     }
+
+    private File convertMultiPartToFile(MultipartFile file) throws IOException {
+        File convFile = new File(file.getOriginalFilename());
+        FileOutputStream fos = new FileOutputStream(convFile);
+        fos.write(file.getBytes());
+        fos.close();
+        return convFile;
+    }
 }
+
