@@ -18,8 +18,6 @@ public class S3Config {
     private String accessKey;
     @Value("${cloud.aws.credentials.secretKey}")
     private String secretKey;
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
 
     @Bean
     public AmazonS3 amazonS3() {

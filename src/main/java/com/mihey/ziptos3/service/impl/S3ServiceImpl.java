@@ -13,6 +13,11 @@ import java.util.zip.ZipInputStream;
 public class S3ServiceImpl {
 
     public void upload(MultipartFile file) throws IOException {
+        unZip(file);
+        //TODO implement upload to S3
+    }
+
+    private void unZip(MultipartFile file) throws IOException {
         File destDir = new File("/home/mihey/Documents/Temp/testUnZip/unzip");
         byte[] buffer = new byte[1024];
         ZipInputStream zis = new ZipInputStream(new FileInputStream(convertMultiPartToFile(file)));
