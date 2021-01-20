@@ -1,6 +1,9 @@
 package com.mihey.ziptos3.service.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,9 +34,12 @@ public class S3ServiceImpl {
     public String upload(MultipartFile zipFile) throws IOException {
 
         String zipFileName = unZip(zipFile);
+        TransferManager transferManager = TransferManagerBuilder.standard()
+                .withS3Client(s3client).build();
         File uploadFile = new File(destinationDirectory + "/" + zipFileName);
-        s3client.putObject(bucket, zipFileName, uploadFile);
-        return "File uploaded";
+        MultipleFileUpload upload = transferManager
+                .uploadDirectory(bucket, zipFileName, uploadFile, true);
+        return "File uploaded to S3";
 
     }
 
