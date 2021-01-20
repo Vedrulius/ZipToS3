@@ -1,5 +1,7 @@
 package com.mihey.ziptos3.service.impl;
 
+import com.amazonaws.services.s3.AmazonS3;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,22 +12,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
 @Service
 public class S3ServiceImpl {
 
     @Value("${destinationDirectory}")
     private String destinationDirectory;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
-    public void upload(MultipartFile file) throws IOException {
-        unZip(file);
-        //TODO implement upload to S3
+    private AmazonS3 s3client;
+
+    @Autowired
+    public S3ServiceImpl(AmazonS3 s3client) {
+        this.s3client = s3client;
     }
 
-    private void unZip(MultipartFile file) throws IOException {
+    public String upload(MultipartFile zipFile) throws IOException {
+
+        String zipFileName = unZip(zipFile);
+        File uploadFile = new File(destinationDirectory + "/" + zipFileName);
+        s3client.putObject(bucket, zipFileName, uploadFile);
+        return "File uploaded";
+
+    }
+
+    private String unZip(MultipartFile file) throws IOException {
         File destDir = new File(destinationDirectory);
         byte[] buffer = new byte[1024];
         ZipInputStream zis = new ZipInputStream(new FileInputStream(convertMultiPartToFile(file)));
         ZipEntry zipEntry = zis.getNextEntry();
+        String name = zipEntry.getName();
         while (zipEntry != null) {
             File newFile = newFile(destDir, zipEntry);
             if (zipEntry.isDirectory()) {
@@ -46,9 +63,10 @@ public class S3ServiceImpl {
             }
             zipEntry = zis.getNextEntry();
         }
+        return name;
     }
 
-    private  File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+    private File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
         File destFile = new File(destinationDir, zipEntry.getName());
 
         String destDirPath = destinationDir.getCanonicalPath();

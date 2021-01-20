@@ -22,8 +22,7 @@ public class S3Controller {
         if (file.isEmpty()) {
             return "File is empty";
         }
-        service.upload(file);
-        return "file upload";
+        return service.upload(file);
     }
 
 }
