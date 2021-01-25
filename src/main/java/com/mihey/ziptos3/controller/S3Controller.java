@@ -2,6 +2,8 @@ package com.mihey.ziptos3.controller;
 
 import com.mihey.ziptos3.service.impl.S3ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,11 +20,10 @@ public class S3Controller {
     private S3ServiceImpl service;
 
     @PostMapping
-    public String upload(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            return "File is empty";
+            return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
         }
-        return service.upload(file);
+        return new ResponseEntity<>(service.upload(file), HttpStatus.OK);
     }
-
 }

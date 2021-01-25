@@ -23,6 +23,8 @@ public class S3ServiceImpl {
     private String destinationDirectory;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+    @Value("${cloud.aws.s3.url}")
+    private String url;
 
     private AmazonS3 s3client;
 
@@ -39,7 +41,8 @@ public class S3ServiceImpl {
         File uploadFile = new File(destinationDirectory + "/" + zipFileName);
         MultipleFileUpload upload = transferManager
                 .uploadDirectory(bucket, zipFileName, uploadFile, true);
-        return "File uploaded to S3";
+
+        return url + bucket + "/" + zipFileName;
 
     }
 
